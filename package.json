@@ -7,7 +7,13 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "jison": "jison ./src/app/grammar/grammar.jison && mv grammar.js ./src/app/grammar/"
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
   },
   "private": true,
   "dependencies": {
@@ -19,6 +25,12 @@
     "@angular/platform-browser": "~9.1.12",
     "@angular/platform-browser-dynamic": "~9.1.12",
     "@angular/router": "~9.1.12",
+    "@ctrl/ngx-codemirror": "^4.0.1",
+    "bootstrap": "^4.5.2",
+    "codemirror": "^5.57.0",
+    "jison": "^0.4.18",
+    "jquery": "^3.5.1",
+    "popper.js": "^1.16.1",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"

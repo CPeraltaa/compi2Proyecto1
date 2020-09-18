@@ -1,0 +1,12 @@
+<div style="height: 400px" class="ngx-codemirror">
+  <label for="codeEditor">Code</label>
+  <ngx-codemirror
+    id="codeEditor"
+    [options]="options"
+    [(ngModel)]="entrada"
+    [disabled]="false"
+    [autoFocus]="true"
+  >
+  </ngx-codemirror>
+</div>
+<app-console></app-console>
