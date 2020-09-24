@@ -28,6 +28,7 @@
     "@ctrl/ngx-codemirror": "^4.0.1",
     "bootstrap": "^4.5.2",
     "codemirror": "^5.57.0",
+    "d3-graphviz": "^3.1.0",
     "jison": "^0.4.18",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",

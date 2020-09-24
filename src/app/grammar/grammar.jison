@@ -2,12 +2,21 @@
 
 
 
-/*Segmento de codigo
+/*Segmento de codigo*/
 %{
+    const {NodoArbol, DrawArbol} = require('../ast/ast');
 
-}%
+    var id = 0;
 
-*/
+    function inc(){
+        id++;
+        return id;
+    }
+
+    var raiz = new NodoArbol("s", -1, null);
+%}
+
+
 
 /* Direcciones lexical de la gramatica */
 %lex
@@ -147,7 +156,9 @@
 // the result. $1 refers to the first child node,
 // i.e. the "e"
 
-S:                      INICIO EOF
+S:                      INICIO EOF{
+                            return $1;
+                        }
                         ;
 
 INICIO:                 LINSTRUCCIONES
@@ -183,10 +194,26 @@ TYPEFUNCION:             TYPEVAR
                         | Identificador;
 
 
-TYPEVAR:                tBoolean
-                        | tNumber
-                        | tString
-                        | tnull
+TYPEVAR:                tBoolean{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            $$ = temp;
+                        }
+                        | tNumber{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            $$ = temp;
+                        }
+                        | tString{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            $$ = temp;
+                        }
+                        | tnull{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            $$ = temp;
+                        }
                         ;
 
 //Estructuras TYPE
@@ -234,13 +261,36 @@ PARAMFUNCION:           Identificador tDosPts TYPEVAR tIgual logi
 //DECLARACION DE VARIABLES 
 
 
-LISTDECID:              LISTDECID  tComa TIPODEDECL
-                        | TIPODEDECL
+LISTDECID:              LISTDECID  tComa TIPODEDECL{
+                            id = inc();
+                            var temp = new NodoArbol("Let", id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | TIPODEDECL{
+                            $$ = $1;
+                        }
                         ;
 
-TIPODEDECL:             Identificador
-                        | Identificador tDosPts TYPEVAR
-                        | Identificador tDosPts Identificador
+TIPODEDECL:             Identificador{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);                            
+                        }
+                        | Identificador tDosPts TYPEVAR{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();                      
+                            temp.addNodo(new NodoArbol($1.toString(), id, null));
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Identificador{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();                         
+                            temp.addNodo(new NodoArbol($1.toString(), id, null));
+                            $$ = temp;
+                        }
                         | Identificador tDosPts TYPEVAR tIgual  VARIGUA
                         | Identificador tDosPts Identificador tIgual  VARIGUA
                         | Identificador tIgual VARIGUA
@@ -257,13 +307,20 @@ TIPODEDECL:             Identificador
                         
                         ;
 
-VARIGUA:    logi
+VARIGUA:    logi{
+                $$ = $1;
+            }
             | tLlavea LISTAVAR tLlavec 
             ;
 
 
 
-DEC_VARIABLE:           tlet LISTDECID tPtcoma
+DEC_VARIABLE:           tlet LISTDECID tPtcoma{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($2);
+                            $$ = temp;
+                        }
                         | tconst Identificador tDosPts TYPEVAR tIgual logi tPtcoma
                         | tconst Identificador tIgual logi tPtcoma
 
@@ -401,60 +458,193 @@ ACCSATRI:               CALLLlist tIgual logi
 
 //logi
  
-    logi :              logi tAnd logi
-                        | logi tOr logi 
-                        | tNot logi
-                        | condExpression
+    logi :              logi tAnd logi{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | logi tOr logi{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | tNot logi{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($2);
+                            $$ = temp;
+                        }
+                        | condExpression{
+                            $$ = $1;
+                        }
                         ;
                   
   
 
-    condExpression :    condExpression tMayor sumres                 
-                        | condExpression tMenor sumres                 
-                        | condExpression tMayoI sumres                 
-                        | condExpression tMenoI  sumres
-                        | condExpression tIguaIg sumres
-                        | condExpression tNoIgu sumres 
-                        | sumres 
+    condExpression :    condExpression tMayor sumres{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | condExpression tMenor sumres{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }              
+                        | condExpression tMayoI sumres{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }            
+                        | condExpression tMenoI  sumres{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | condExpression tIguaIg sumres{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | condExpression tNoIgu sumres{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | sumres{
+                            $$ = $1;
+                        }
                         ;
         
    
 
-    sumres :             sumres tMas multdiv
-                        | sumres tMenos multdiv 
-                        | multdiv
+    sumres :             sumres tMas multdiv{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | sumres tMenos multdiv{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | multdiv{
+                            $$ = $1;
+                        }
                         ;
    
 
 
 
-    multdiv :           multdiv tPor mod
-                        | multdiv tDivision mod 
-                        | mod
+    multdiv :           multdiv tPor mod{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | multdiv tDivision mod{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | mod{
+                            $$ = $1;
+                        }
                         ;
    
         
 
-    mod :               mod tMod ExprNeg 
-                        | ExprNeg
+    mod :               mod tMod ExprNeg{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | ExprNeg{
+                            $$ = $1;
+                        }
                         ;
 
   
    
-    ExprNeg :           Expressn tMasm
-                        | Expressn tMenosm   
-                        | Expressn
-                        | tMenos Expressn
+    ExprNeg :           Expressn tMasm{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            $$ = temp;
+                        }
+                        | Expressn tMenosm{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            temp.addNodo($1);
+                            $$ = temp;
+                        }
+                        | Expressn{
+                            $$ = $1;
+                        }
+                        | tMenos Expressn{     
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($2);
+                            $$ = temp;
+                        }
                         ;
 
-    Expressn:            tPara logi tParc           
-                        | Number
-                        | Decimal
-                        | Cadena1
-                        | Cadena2 
-                        | ttrue
-                        | tfalse
-                        | tnull
+    Expressn:            tPara logi tParc{
+                            $$ = $1;                           
+                        }
+                        | Number{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | Decimal{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | Cadena1{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | Cadena2{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | ttrue{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | tfalse{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | tnull{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }                 
                         | CALLLlist
                         ;
                 

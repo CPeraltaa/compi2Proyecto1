@@ -24,7 +24,7 @@ export class DrawArbol {
   cuerpo: string;
   cuerpoaux: string;
 
-  constructor(raiz: any) {
+  constructor(raiz: NodoArbol) {
     this.raiz = raiz;
     this.cuerpo = '';
     this.cuerpoaux = '';
