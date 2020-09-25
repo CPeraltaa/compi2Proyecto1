@@ -31,7 +31,7 @@
         <a class="nav-link" href="#">Bug reports</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Ast</a>
+        <a class="nav-link" (click)="toggle()" href="#">Ast</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#">Sym table</a>
@@ -39,4 +39,10 @@
     </ul>
   </div>
 </nav>
-<app-editor #analizador></app-editor>
+<app-editor
+  #analizador
+  [ngStyle]="{ display: showFirst ? 'initial' : 'none' }"
+></app-editor>
+<app-showgraph
+  [ngStyle]="{ display: !showFirst ? 'initial' : 'none' }"
+></app-showgraph>

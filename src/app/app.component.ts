@@ -8,4 +8,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'proyecto-compi';
+  showFirst: boolean = true;
+
+  toggle(): void {
+    this.showFirst = !this.showFirst;
+  }
 }
