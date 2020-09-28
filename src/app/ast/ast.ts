@@ -23,11 +23,13 @@ export class DrawArbol {
   raiz: NodoArbol;
   cuerpo: string;
   cuerpoaux: string;
+  dibujo: string;
 
   constructor(raiz: NodoArbol) {
     this.raiz = raiz;
     this.cuerpo = '';
     this.cuerpoaux = '';
+    this.dibujo = '';
   }
 
   createCuerpo(raiz: NodoArbol): void {
@@ -45,6 +47,6 @@ export class DrawArbol {
     this.createCuerpo(this.raiz);
     let printCuerpo =
       'digraph arbolAST{\n' + this.cuerpo + this.cuerpoaux + '}\n';
-    //call d3.graphviz command
+    this.dibujo = printCuerpo;
   }
 }

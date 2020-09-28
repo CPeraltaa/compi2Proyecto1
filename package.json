@@ -27,6 +27,7 @@
     "@angular/router": "~9.1.12",
     "@ctrl/ngx-codemirror": "^4.0.1",
     "@types/d3-graphviz": "^2.6.3",
+    "angular-cli-ghpages": "^0.6.2",
     "bootstrap": "^4.5.2",
     "codemirror": "^5.57.0",
     "d3": "^6.2.0",
