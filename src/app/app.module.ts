@@ -7,9 +7,10 @@ import { AppComponent } from './app.component';
 import { EditorComponent } from './editor/editor.component';
 import { ConsoleComponent } from './console/console.component';
 import { ShowgraphComponent } from './showgraph/showgraph.component';
+import { PruebaComponent } from './prueba/prueba.component';
 
 @NgModule({
-  declarations: [AppComponent, EditorComponent, ConsoleComponent, ShowgraphComponent],
+  declarations: [AppComponent, EditorComponent, ConsoleComponent, ShowgraphComponent, PruebaComponent],
   imports: [BrowserModule, FormsModule, CodemirrorModule],
   providers: [],
   bootstrap: [AppComponent],
