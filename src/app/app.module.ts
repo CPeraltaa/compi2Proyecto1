@@ -14,7 +14,6 @@ import { ShowgraphComponent } from './showgraph/showgraph.component';
     EditorComponent,
     ConsoleComponent,
     ShowgraphComponent,
-    PruebaComponent,
   ],
   imports: [BrowserModule, FormsModule, CodemirrorModule],
   providers: [],
