@@ -25,7 +25,7 @@ export class EditorComponent implements OnInit {
 
   ejecutar() {
     try {
-      const value = Parser.parse(this.entrada);
+      const value = Parser.parseAST(this.entrada);
       this.salida = value + '';
     } catch (error) {
       alert('Aun no valido errores ' + error.toString());

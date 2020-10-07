@@ -7,13 +7,20 @@
     const {NodoArbol, DrawArbol} = require('../ast/ast');
 
     var id = 0;
+    var raiz = new NodoArbol("s", -1, null);
 
     function inc(){
         id++;
         return id;
     }
 
-    var raiz = new NodoArbol("s", -1, null);
+    function parseAST(entrada){
+        this.parse(entrada);
+        var grafica = new DrawArbol(raiz);
+        grafica.createArbol();
+    }
+
+    exports.parseAST = parseAST;
 %}
 
 
@@ -157,20 +164,34 @@
 // i.e. the "e"
 
 S:                      INICIO EOF{
-                            return $1;
+                            raiz.addNodo($1);
                         }
                         ;
 
-INICIO:                 LINSTRUCCIONES
+INICIO:                 LINSTRUCCIONES{
+                            $$ = $1;
+                        }
                         ;
 
 
-LINSTRUCCIONES:         LINSTRUCCIONES INSTRUCCIONES
-                        | INSTRUCCIONES
+LINSTRUCCIONES:         LINSTRUCCIONES INSTRUCCIONES{
+                            id = inc();
+                            var temp = new NodoArbol("ListInstrucciones", id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($2);
+                            $$ = temp;
+                        }
+                        | INSTRUCCIONES{
+                            $$ = $1;
+                        }
                         ;
 
-INSTRUCCIONES:          FUNCION 
-                        | DEC_VARIABLE
+INSTRUCCIONES:          FUNCION{
+                            $$ = $1;
+                        }
+                        | DEC_VARIABLE{
+                            $$ = $1;
+                        }
                         | logi tPtcoma
                         | TYPESTRUCT
                         | ACCSATRI tPtcoma  
@@ -189,9 +210,18 @@ FUNCION:                tfunction Identificador tPara LPRAMFUNC tParc tLlavea BO
 
 //tipos de funciones con Identificador inlcuido revisar 
 
-TYPEFUNCION:             TYPEVAR
-                        | tVoid
-                        | Identificador;
+TYPEFUNCION:             TYPEVAR{
+                            $$ = $1;
+                        }
+                        | tVoid{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | Identificador{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        ;
 
 
 TYPEVAR:                tBoolean{
@@ -220,41 +250,105 @@ TYPEVAR:                tBoolean{
 TYPESTRUCT:         ttype Identificador tIgual tLlavea LISTAVAR tLlavec tPtcoma
                     ;
 
-LISTAVAR:           LISTAVAR tComa Identificador tDosPts LISTYPE
-                    | Identificador tDosPts LISTYPE
+LISTAVAR:           LISTAVAR tComa Identificador tDosPts LISTYPE{
+                        id = inc();
+                        var temp = new NodoArbol("ListaVar", id, null);
+                        id = inc();
+                        var temp2 = new NodoArbol($3.toString(), id, null);
+                        $5.addNodo(temp2);
+                        temp.addNodo($1);
+                        temp.addNodo($5);
+                    }
+                    | Identificador tDosPts LISTYPE{
+                        id = inc();
+                        $3.addNodo(new NodoArbol($1.toString(), id, null));
+                        $$ = $3;
+                    }
                     ;
 
 
 
 
-LISTYPE:        TYPEVAR
-                | Identificador
+LISTYPE:        TYPEVAR{
+                    $$ = $1;
+                }
+                | Identificador{
+                    id = inc();
+                    $$ = new NodoArbol($1.toString(), id, null);
+                }
                 ;
-
-//LISTA DE INSTUCCIONES DE UNA FUNCION
-
-
-INSTRUCCIONESFUNR:      INSTRUCCIONESFUNR INSTRUFUN
-                        | INSTRUFUN
-                        ;
 
 //PARAMETROS DE FUNCION
 
-LPRAMFUNC:              LPRAMFUNC tComa PARAMFUNCION
-                        | PARAMFUNCION
+LPRAMFUNC:              LPRAMFUNC tComa PARAMFUNCION{
+                            id = inc();
+                            var temp = new NodoArbol("ListParam", id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | PARAMFUNCION{
+                            $$ = $1;
+                        }
                         ;
 
-PARAMFUNCION:           Identificador tDosPts TYPEVAR tIgual logi
-                        | Identificador tTern tDosPts TYPEVAR
-                        | Identificador tDosPts TYPEVAR
-                        | Identificador tDosPts Identificador tIgual logi
-                        | Identificador tTern tDosPts Identificador
-                        | Identificador tDosPts Identificador
-                        | Identificador tDosPts TYPEVAR LISTACOR
-                        | Identificador tDosPts Identificador LISTACOR
+PARAMFUNCION:           Identificador tDosPts TYPEVAR tIgual logi{
+                            id = inc();
+                            var temp = new NodoArbol($4.toString(), id, null);
+                            id = inc();
+                            $3.addNodo(new NodoArbol($1.toString(), id, null));
+                            temp.addNodo($3);
+                            temp.addNodo($5);
+                            $$ = temp;
+                        }
+                        | Identificador tTern tDosPts TYPEVAR{
+                            id = inc();                      
+                            $4.addNodo(new NodoArbol($1.toString() + "?", id, null));
+                            $$ = $4;
+                        }
+                        | Identificador tDosPts TYPEVAR{
+                            id = inc();                      
+                            $3.addNodo(new NodoArbol($1.toString(), id, null));
+                            $$ = $3;
+                        }
+                        | Identificador tDosPts Identificador tIgual logi{
+                            id = inc();
+                            var temp = new NodoArbol($4.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($1.toString(), id, null));
+                            temp.addNodo(temp2);
+                            temp.addNodo($5);
+                            $$ = temp;
+                        }
+                        | Identificador tTern tDosPts Identificador{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();                         
+                            temp.addNodo(new NodoArbol($1.toString() + "?", id, null));
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Identificador{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();                         
+                            temp.addNodo(new NodoArbol($1.toString(), id, null));
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts TYPEVAR LISTACOR{
+                            id = inc();
+                            $3.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            $$ = $3;
+                        }
+                        | Identificador tDosPts Identificador LISTACOR{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            temp.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            $$ = temp;
+                        }
                         ;
-
-
 
 
 
@@ -263,7 +357,7 @@ PARAMFUNCION:           Identificador tDosPts TYPEVAR tIgual logi
 
 LISTDECID:              LISTDECID  tComa TIPODEDECL{
                             id = inc();
-                            var temp = new NodoArbol("Let", id, null);
+                            var temp = new NodoArbol("ListID", id, null);
                             temp.addNodo($1);
                             temp.addNodo($3);
                             $$ = temp;
@@ -275,14 +369,15 @@ LISTDECID:              LISTDECID  tComa TIPODEDECL{
 
 TIPODEDECL:             Identificador{
                             id = inc();
-                            $$ = new NodoArbol($1.toString(), id, null);                            
-                        }
-                        | Identificador tDosPts TYPEVAR{
+                            var temp = new NodoArbol("Any", id, null);
                             id = inc();
-                            var temp = new NodoArbol($3.toString(), id, null);
-                            id = inc();                      
                             temp.addNodo(new NodoArbol($1.toString(), id, null));
-                            $$ = temp;
+                            $$ = temp;                   
+                        }
+                        | Identificador tDosPts TYPEVAR{                                                      
+                            id = inc();                      
+                            $3.addNodo(new NodoArbol($1.toString(), id, null));
+                            $$ = $3;
                         }
                         | Identificador tDosPts Identificador{
                             id = inc();
@@ -291,26 +386,127 @@ TIPODEDECL:             Identificador{
                             temp.addNodo(new NodoArbol($1.toString(), id, null));
                             $$ = temp;
                         }
-                        | Identificador tDosPts TYPEVAR tIgual  VARIGUA
-                        | Identificador tDosPts Identificador tIgual  VARIGUA
-                        | Identificador tIgual VARIGUA
-                        | Identificador tDosPts Array tMenor TYPEVAR tMayor
-                        | Identificador tDosPts Array tMenor Identificador tMayor
-                        | Identificador tDosPts TYPEVAR LISTACOR
-                        | Identificador tDosPts Identificador LISTACOR
-                        | Identificador tDosPts TYPEVAR LISTACOR tIgual tCorizq tCorder
-                        | Identificador tDosPts Identificador LISTACOR tIgual tCorizq tCorder
-                        | Identificador tDosPts Array tMenor TYPEVAR tMayor tIgual tCorizq LISCOND tCorder
-                        | Identificador tDosPts Array tMenor Identificador tMayor tIgual tCorizq LISCOND tCorder
-                        | Identificador tDosPts TYPEVAR LISTACOR tIgual tCorizq LISCOND tCorder
-                        | Identificador tDosPts Identificador LISTACOR tIgual tCorizq LISCOND tCorder
-                        
+                        | Identificador tDosPts TYPEVAR tIgual  VARIGUA{
+                            id = inc();
+                            var temp = new NodoArbol($4.toString(), id, null);
+                            id = inc();
+                            $3.addNodo(new NodoArbol($1.toString(), id, null));
+                            temp.addNodo($3);
+                            temp.addNodo($5);
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Identificador tIgual  VARIGUA{
+                            id = inc();
+                            var temp = new NodoArbol($4.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($1.toString(), id, null));
+                            temp.addNodo(temp2);
+                            temp.addNodo($5);
+                            $$ = temp;
+                        }
+                        | Identificador tIgual VARIGUA{
+                            id = inc();
+                            var temp = new NodoArbol($2.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol("Any", id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($1.toString(), id, null));
+                            temp.addNodo(temp2);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Array tMenor TYPEVAR tMayor{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            $5.addNodo(new NodoArbol($1.toString(), id, null));
+                            temp.addNodo($5);
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Array tMenor Identificador tMayor{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($5.toString(), id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($1.toString(), id, null));
+                            temp.addNodo(temp2);
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts TYPEVAR LISTACOR{
+                            id = inc();
+                            $3.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            $$ = $3;
+                        }
+                        | Identificador tDosPts Identificador LISTACOR{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            temp.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts TYPEVAR LISTACOR tIgual tCorizq tCorder{
+                            id = inc();
+                            $3.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            $$ = $3;
+                        }
+                        | Identificador tDosPts Identificador LISTACOR tIgual tCorizq tCorder{
+                            id = inc();
+                            var temp = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            temp.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Array tMenor TYPEVAR tMayor tIgual tCorizq LISCOND tCorder{
+                            id = inc();
+                            var temp = new NodoArbol($7.toString(), id, null);
+                            id = inc();
+                            $5.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            temp.addNodo($5);
+                            temp.addNodo($9);
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Array tMenor Identificador tMayor tIgual tCorizq LISCOND tCorder{
+                            id = inc();
+                            var temp = new NodoArbol($7.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($5.toString(), id, null);
+                            id = inc();
+                            temp2.addNodo($1.toString() + "[]", id, null);
+                            temp.addNodo(temp2);
+                            temp.addNodo($9);
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts TYPEVAR LISTACOR tIgual tCorizq LISCOND tCorder{
+                            id = inc();
+                            var temp = new NodoArbol($5.toString(), id, null);
+                            id = inc();
+                            $3.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            temp.addNodo($3);
+                            temp.addNodo($7);
+                            $$ = temp;
+                        }
+                        | Identificador tDosPts Identificador LISTACOR tIgual tCorizq LISCOND tCorder{
+                            id = inc();
+                            var temp = new NodoArbol($5.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($1.toString() + "[]", id, null));
+                            temp.addNodo(temp2);
+                            temp.addNodo($7);
+                            $$ = temp;
+                        }
                         ;
 
 VARIGUA:    logi{
                 $$ = $1;
             }
-            | tLlavea LISTAVAR tLlavec 
+            | tLlavea LISTAVAR tLlavec{
+                $$ = $2;
+            }
             ;
 
 
@@ -321,15 +517,46 @@ DEC_VARIABLE:           tlet LISTDECID tPtcoma{
                             temp.addNodo($2);
                             $$ = temp;
                         }
-                        | tconst Identificador tDosPts TYPEVAR tIgual logi tPtcoma
-                        | tconst Identificador tIgual logi tPtcoma
-
+                        | tconst Identificador tDosPts TYPEVAR tIgual logi tPtcoma{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($5.toString(), id, null);
+                            id = inc();
+                            $4.addNodo(new NodoArbol($2.toString(), id, null));
+                            temp2.addNodo($4);
+                            temp2.addNodo($6);
+                            temp.addNodo(temp2);
+                            $$ = temp;
+                        }
+                        | tconst Identificador tIgual logi tPtcoma{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($3.toString(), id, null);
+                            id = inc();
+                            var temp3 = new NodoArbol("Any", id, null);
+                            id = inc();
+                            temp3.addNodo(new NodoArbol($2.toString(), id, null));
+                            temp2.addNodo(temp3);
+                            temp2.addNodo($4);
+                            temp.addNodo(temp2);
+                            $$ = temp;
+                        }
                         ;
 
 
 //LIST logi
-LISCOND:                LISCOND tComa logi
-                        | logi
+LISCOND:                LISCOND tComa logi{
+                            id = inc();
+                            var temp = new NodoArbol("ListLogi", id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($3);
+                            $$ = temp;
+                        }
+                        | logi{
+                            $$ = $1;
+                        }
                         ;
 
 
@@ -350,88 +577,281 @@ LISTACOR:               LISTACOR tCorizq tCorder
 
 
 
-BODYFUN:                BODYFUN INS_FUN
-                        | INS_FUN                                   
+BODYFUN:                BODYFUN INS_FUN{
+                            id = inc();
+                            var temp = new NodoArbol("ListInsFunc", id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($2);
+                            $$ = temp;
+                        }
+                        | INS_FUN{
+                            $$ = $1;
+                        }                                     
                         ;
 
 
-INS_FUN:                CNIF_F                    
-                        | WHILE_F                                
-                        | SWITCH_F                    
-                        | ACCSATRI tPtcoma                                                     
-                        | DO_F                                
-                        | FOR_F                            
-                        | DEC_VARIABLE   
-                        | ASIG_VARIABLE                                
-                        | logi tPtcoma                            
-                        | tReturn logi tPtcoma     
+INS_FUN:                CNIF_F{
+                            $$ = $1;
+                        }                 
+                        | WHILE_F{
+                            $$ = $1;
+                        }                                   
+                        | SWITCH_F{
+                            $$ = $1;
+                        }                        
+                        | ACCSATRI tPtcoma{
+                            $$ = $1;
+                        }                                                          
+                        | DO_F{
+                            $$ = $1;
+                        }                                  
+                        | FOR_F{
+                            $$ = $1;
+                        }       
+                        | DEC_VARIABLE{
+                            $$ = $1;
+                        }
+                        | ASIG_VARIABLE{
+                            $$ = $1;
+                        }
+                        | logi tPtcoma{
+                            $$ = $1;
+                        }                           
+                        | tReturn logi tPtcoma
                         | tReturn tPtcoma                  
                         | error tPtcoma                                
                         ;
 
 
 // INICO  SENTENCIA IF
-CNIF_F:                 tif tPara logi tParc tLlavea BODYFUN tLlavec ELSEIF_F telse tLlavea BODYFUN tLlavec
-                        | tif tPara logi tParc tLlavea BODYFUN tLlavec telse tLlavea BODYFUN tLlavec                  
-                        | tif tPara logi tParc tLlavea BODYFUN tLlavec ELSEIF_F                  
-                        | tif tPara logi tParc tLlavea BODYFUN tLlavec 
+CNIF_F:                 tif tPara logi tParc tLlavea BODYFUN tLlavec ELSEIF_F telse tLlavea BODYFUN tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            temp.addNodo($8);
+                            id = inc();
+                            var temp2 = new NodoArbol($9.toString(), id, null);
+                            temp2.addNodo($11);
+                            temp.addNodo(temp2);
+                            $$ = temp;
+                        }
+                        | tif tPara logi tParc tLlavea BODYFUN tLlavec telse tLlavea BODYFUN tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol($8.toString(), id, null);
+                            temp2.addNodo($10);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            temp.addNodo(temp2);
+                            $$ = temp;
+                        }                
+                        | tif tPara logi tParc tLlavea BODYFUN tLlavec ELSEIF_F{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            temp.addNodo($8);
+                            $$ = temp;
+                        }              
+                        | tif tPara logi tParc tLlavea BODYFUN tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            $$ = temp;
+                        }
                         //| tif  error tPtcoma                     
                         ;
 
 
 
-ELSEIF_F:               ELSEIF_F EI_F
-                        | EI_F                  
+ELSEIF_F:               ELSEIF_F EI_F{
+                            id = inc();
+                            var temp = new NodoArbol("ListElseIf", id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($2);
+                            $$ = temp;
+                        }
+                        | EI_F{
+                            $$ = $1;
+                        }               
                         ;
 
 
- EI_F:                  telse tif tPara logi tParc tLlavea BODYFUN tLlavec  
-                       ;    
+ EI_F:                  telse tif tPara logi tParc tLlavea BODYFUN tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol("else if", id, null);
+                            temp.addNodo($4);
+                            temp.addNodo($7);
+                            $$ = temp;
+                        }
+                        ;    
 
 
 
 // INICO  SENTENCIA SWITCH
-SWITCH_F:               tswitch tPara logi tParc tLlavea LCASE_F tdefault tDosPts BODYFUN tBreak tPtcoma tLlavec
-                        | tswitch tPara logi tParc tLlavea LCASE_F tdefault tDosPts BODYFUN  tLlavec
-                        | tswitch tPara logi tParc tLlavea LCASE_F  tLlavec
+SWITCH_F:               tswitch tPara logi tParc tLlavea LCASE_F tdefault tDosPts BODYFUN tBreak tPtcoma tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol("SWITCH", id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol("DEFAULT", id, null);
+                            temp2.addNodo($9);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol("BREAK", id, null));
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            temp.addNodo(temp2);
+                            $$ = temp;
+                        }
+                        | tswitch tPara logi tParc tLlavea LCASE_F tdefault tDosPts BODYFUN  tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol("SWITCH", id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol("DEFAULT", id, null);
+                            temp2.addNodo($9);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            temp.addNodo(temp2);
+                            $$ = temp;
+                        }
+                        | tswitch tPara logi tParc tLlavea LCASE_F  tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol("SWITCH", id, null);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            $$ = temp;
+                        }
                         ;
     
                   
 
 
-LCASE_F:                LCASE_F CASE_F
-                        | CASE_F
+LCASE_F:                LCASE_F CASE_F{
+                            id = inc();
+                            var temp = new NodoArbol("ListCase", id, null);
+                            temp.addNodo($1);
+                            temp.addNodo($2);
+                            $$ = temp;
+                        }
+                        | CASE_F{
+                            $$ = $1;
+                        }
                         ;
 
 
-CASE_F:                 tcase VALOP tDosPts BODYFUN tBreak tPtcoma
-                        | tcase VALOP tDosPts BODYFUN 
+CASE_F:                 tcase VALOP tDosPts BODYFUN tBreak tPtcoma{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($2);
+                            temp.addNodo($4);
+                            id = inc();
+                            temp.addNodo(new NodoArbol($5.toString(), id, null));
+                            $$ = temp;
+                        }
+                        | tcase VALOP tDosPts BODYFUN{
+                            id = inc();
+                            var temp = new NodoArbol($1.toString(), id, null);
+                            temp.addNodo($2);
+                            temp.addNodo($4);
+                            $$ = temp;
+                        }
                         ;
 
-VALOP:                  | Cadena1
-                        | Decimal
-                        | Number
-                        | Cadena2
+VALOP:                  | Cadena1{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | Decimal{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | Number{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
+                        | Cadena2{
+                            id = inc();
+                            $$ = new NodoArbol($1.toString(), id, null);
+                        }
                         ;
 
 //WHILE 
 
-WHILE_F:                twhile tPara logi tParc tLlavea BODYFUN tLlavec
+WHILE_F:                twhile tPara logi tParc tLlavea BODYFUN tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol("WHILE", id, null);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            $$ = temp;
+                        }
                         ;
 
  
 //DO DE UNA FUNCION:                                  
-DO_F:                   tdo tLlavea BODYFUN tLlavec twhile tPara logi tParc tPtcoma
+DO_F:                   tdo tLlavea BODYFUN tLlavec twhile tPara logi tParc tPtcoma{
+                            id = inc();
+                            var temp = new NodoArbol("DO WHILE", id, null);
+                            temp.addNodo($3);
+                            temp.addNodo($7);
+                            $$ = temp;
+                        }
                         ;
 
 // FOR DE UNA FUNCION
-FOR_F:                  tfor tPara FORCON tParc tLlavea BODYFUN tLlavec
+FOR_F:                  tfor tPara FORCON tParc tLlavea BODYFUN tLlavec{
+                            id = inc();
+                            var temp = new NodoArbol("FOR", id, null);
+                            temp.addNodo($3);
+                            temp.addNodo($6);
+                            $$ = temp;
+                        }
                         ;                        
 
-FORCON:                 tlet Identificador tIgual logi tPtcoma logi tPtcoma logi
-                        | tlet Identificador tof Identificador
-                        | tlet Identificador tin Identificador
+FORCON:                 tlet Identificador tIgual logi tPtcoma logi tPtcoma logi{
+                            id = inc();
+                            var temp = new NodoArbol("FOR COND", id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol("Any", id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($2.toString(), id, null));
+                            id = inc();
+                            var temp3 = new NodoArbol($3.toString(), id, null);
+                            temp3.addNodo(temp2);
+                            temp3.addNodo($4);
+                            temp.addNodo(temp3);
+                            temp.addNodo($6);
+                            temp.addNodo($8);
+                            $$ = temp;
 
+                        }
+                        | tlet Identificador tof Identificador{
+                            id = inc();
+                            var temp = new NodoArbol("OF", id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol("Any", id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($2.toString(), id, null));
+                            id = inc();
+                            var temp3 = new NodoArbol($4.toString(), id, null);
+                            temp.addNodo(temp2);
+                            temp.addNodo(temp3);
+                            $$ = temp;
+                        }
+                        | tlet Identificador tin Identificador{
+                            id = inc();
+                            var temp = new NodoArbol("IN", id, null);
+                            id = inc();
+                            var temp2 = new NodoArbol("Any", id, null);
+                            id = inc();
+                            temp2.addNodo(new NodoArbol($2.toString(), id, null));
+                            id = inc();
+                            var temp3 = new NodoArbol($4.toString(), id, null);
+                            temp.addNodo(temp2);
+                            temp.addNodo(temp3);
+                            $$ = temp;
+                        }
                         ;
 
 

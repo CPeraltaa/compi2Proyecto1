@@ -1,3 +1,4 @@
+import { DrawArbol } from './../ast/ast';
 import { wasmFolder } from '@hpcc-js/wasm';
 import { graphviz } from 'd3-graphviz';
 import { Component, OnInit } from '@angular/core';
@@ -8,10 +9,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./showgraph.component.css'],
 })
 export class ShowgraphComponent implements OnInit {
-  constructor() {}
+  constructor(private arbolito: DrawArbol) {}
 
   ngOnInit(): void {
     wasmFolder('/assets/@hpcc-js/wasm/dist/');
-    graphviz('#graph').renderDot('digraph {a -> b}');
+    graphviz('#graph').renderDot(this.arbolito.returnAST());
   }
 }

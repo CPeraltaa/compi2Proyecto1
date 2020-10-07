@@ -1,3 +1,5 @@
+import { Injectable, Optional } from '@angular/core';
+
 export class NodoArbol {
   etiqueta: string;
   idnodo: number;
@@ -19,17 +21,20 @@ export class NodoArbol {
   }
 }
 
+@Injectable({
+  providedIn: 'root',
+})
 export class DrawArbol {
   raiz: NodoArbol;
   cuerpo: string;
   cuerpoaux: string;
   dibujo: string;
 
-  constructor(raiz: NodoArbol) {
+  constructor(@Optional() raiz: NodoArbol) {
     this.raiz = raiz;
     this.cuerpo = '';
     this.cuerpoaux = '';
-    this.dibujo = '';
+    this.dibujo = 'digraph {a -> b}'; //valor inicial de prueba
   }
 
   createCuerpo(raiz: NodoArbol): void {
@@ -48,5 +53,10 @@ export class DrawArbol {
     let printCuerpo =
       'digraph arbolAST{\n' + this.cuerpo + this.cuerpoaux + '}\n';
     this.dibujo = printCuerpo;
+    console.log(this.dibujo);
+  }
+
+  returnAST(): string {
+    return this.dibujo;
   }
 }
